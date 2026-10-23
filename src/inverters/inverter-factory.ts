@@ -1,3 +1,4 @@
+import { Outback } from './brands/outback';
 import { InverterModel } from '../types';
 import { Solis } from './brands/solis';
 import { InverterSettingsDto } from './dto/inverter-settings.dto';
@@ -43,6 +44,8 @@ export class InverterFactory {
 
 	private static createInstance(brand: InverterModel): InverterSettingsDto {
 		switch (brand) {
+			case InverterModel.Outback:
+				return new Outback();
 			case InverterModel.SRNEHES:
 				return new SRNEHES();
 			case InverterModel.Chisage:
