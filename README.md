@@ -5,7 +5,7 @@ An animated Home Assistant card to emulate the power flow that's shown on the Su
 [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=johanolfert&repository=sunsynk-power-flow-card&category=plugin)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/johanolfert/sunsynk-power-flow-card?style=for-the-badge)
 [![Community Forum](https://img.shields.io/badge/community-forum-brightgreen.svg?style=for-the-badge)](https://community.home-assistant.io/t/sunsynk-deye-inverter-power-flow-card/562933/1)
-<a href="https://www.buymeacoffee.com/slipx" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="28" width="120"></a>
+
 
 ## Documentation
 
