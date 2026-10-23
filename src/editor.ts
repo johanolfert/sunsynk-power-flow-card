@@ -11,7 +11,7 @@ import {
 	InverterModel,
 	sunsynkPowerFlowCardConfig,
 } from './types';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement } from 'lit/decorators.js';
 import { localize } from './localize/localize';
 import { capitalize } from 'lodash';
 import defaults from './defaults';
@@ -23,9 +23,17 @@ export class SunSynkCardEditor
 	extends LitElement
 	implements LovelaceCardEditor
 {
-	@property() public hass!: HomeAssistant;
-	@property() private _config!: sunsynkPowerFlowCardConfig;
-	@property() lovelace?: LovelaceConfig;
+	private _hass?: HomeAssistant;
+	public get hass(): HomeAssistant {
+		return this._hass!;
+	}
+	public set hass(value: HomeAssistant) {
+		const oldValue = this._hass;
+		this._hass = value;
+		this.requestUpdate('hass', oldValue);
+	}
+	private _config!: sunsynkPowerFlowCardConfig;
+	lovelace?: LovelaceConfig;
 
 	// Cache for performance
 	private _cachedSanitizedConfig?: sunsynkPowerFlowCardConfig;
@@ -508,6 +516,7 @@ export class SunSynkCardEditor
 			...(clone as unknown as sunsynkPowerFlowCardConfig),
 		};
 		this._configVersion++;
+		this.requestUpdate();
 	}
 
 	protected render(): TemplateResult | void {

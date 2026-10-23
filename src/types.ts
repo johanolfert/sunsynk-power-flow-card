@@ -8,6 +8,7 @@ declare global {
 }
 
 export enum InverterModel {
+	Outback = 'outback',
 	Azzurro = 'azzurro',
 	CESBatteryBox = 'ces-battery-box',
 	Chisage = 'chisage',
