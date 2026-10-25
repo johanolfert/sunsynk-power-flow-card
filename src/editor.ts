@@ -17,37 +17,12 @@ import { capitalize } from 'lodash';
 import defaults from './defaults';
 import { EDITOR_NAME, SensorDeviceClass } from './const';
 import { LovelaceConfig } from 'custom-card-helpers/src/types';
-import { widenEditorDialog } from './helpers/editor-dialog';
 
 @customElement(EDITOR_NAME)
 export class SunSynkCardEditor
 	extends LitElement
 	implements LovelaceCardEditor
 {
-	private _restoreEditorDialog?: () => void;
-	private _dialogFrame?: number;
-
-	connectedCallback(): void {
-		super.connectedCallback();
-		void this.updateComplete.then(() => {
-			if (!this.isConnected) return;
-			this._dialogFrame = requestAnimationFrame(() => {
-				this._dialogFrame = undefined;
-				if (this.isConnected && !this._restoreEditorDialog) {
-					this._restoreEditorDialog = widenEditorDialog(this);
-				}
-			});
-		});
-	}
-
-	disconnectedCallback(): void {
-		if (this._dialogFrame !== undefined) cancelAnimationFrame(this._dialogFrame);
-		this._dialogFrame = undefined;
-		this._restoreEditorDialog?.();
-		this._restoreEditorDialog = undefined;
-		super.disconnectedCallback();
-	}
-
 	private _hass?: HomeAssistant;
 	public get hass(): HomeAssistant {
 		return this._hass!;
@@ -1292,6 +1267,7 @@ export class SunSynkCardEditor
 									{
 										name: 'entities',
 										type: 'grid',
+										column_min_width: '100%',
 										schema: [
 											{
 												name: 'day_pv_energy_108',
@@ -1445,6 +1421,7 @@ export class SunSynkCardEditor
 									{
 										name: 'entities',
 										type: 'grid',
+										column_min_width: '100%',
 										schema: [
 											{
 												name: 'day_battery_charge_70',
@@ -1467,6 +1444,7 @@ export class SunSynkCardEditor
 											{
 												name: 'entities',
 												type: 'grid',
+												column_min_width: '100%',
 												schema: [
 													{
 														name: 'battery_power_190',
@@ -1529,6 +1507,7 @@ export class SunSynkCardEditor
 														{
 															name: 'entities',
 															type: 'grid',
+															column_min_width: '100%',
 															schema: [
 																{
 																	name: 'battery2_power_190',
@@ -1602,6 +1581,7 @@ export class SunSynkCardEditor
 									{
 										name: 'entities',
 										type: 'grid',
+										column_min_width: '100%',
 										schema: [
 											{ name: 'inverter_status_59', selector: { entity: {} } },
 											{ name: 'use_timer_248', selector: { entity: {} } },
@@ -1705,6 +1685,7 @@ export class SunSynkCardEditor
 									{
 										name: 'entities',
 										type: 'grid',
+										column_min_width: '100%',
 										schema: [
 											{
 												name: 'day_load_energy_84',
@@ -1837,6 +1818,7 @@ export class SunSynkCardEditor
 									{
 										name: 'entities',
 										type: 'grid',
+										column_min_width: '100%',
 										schema: [
 											{
 												name: 'day_grid_import_76',
