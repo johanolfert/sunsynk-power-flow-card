@@ -17,12 +17,37 @@ import { capitalize } from 'lodash';
 import defaults from './defaults';
 import { EDITOR_NAME, SensorDeviceClass } from './const';
 import { LovelaceConfig } from 'custom-card-helpers/src/types';
+import { widenEditorDialog } from './helpers/editor-dialog';
 
 @customElement(EDITOR_NAME)
 export class SunSynkCardEditor
 	extends LitElement
 	implements LovelaceCardEditor
 {
+	private _restoreEditorDialog?: () => void;
+	private _dialogFrame?: number;
+
+	connectedCallback(): void {
+		super.connectedCallback();
+		void this.updateComplete.then(() => {
+			if (!this.isConnected) return;
+			this._dialogFrame = requestAnimationFrame(() => {
+				this._dialogFrame = undefined;
+				if (this.isConnected && !this._restoreEditorDialog) {
+					this._restoreEditorDialog = widenEditorDialog(this);
+				}
+			});
+		});
+	}
+
+	disconnectedCallback(): void {
+		if (this._dialogFrame !== undefined) cancelAnimationFrame(this._dialogFrame);
+		this._dialogFrame = undefined;
+		this._restoreEditorDialog?.();
+		this._restoreEditorDialog = undefined;
+		super.disconnectedCallback();
+	}
+
 	private _hass?: HomeAssistant;
 	public get hass(): HomeAssistant {
 		return this._hass!;
