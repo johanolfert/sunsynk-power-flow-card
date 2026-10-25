@@ -1946,6 +1946,10 @@ export class SunSynkCardEditor
 
 		const name = typeof data?.name === 'string' ? data.name : '';
 		if (!name) return '';
+		if (this._config?.inverter?.model === InverterModel.Outback) {
+			if (name === 'dc_transformer_temp_90') return 'AC1 Transformer Temperature';
+			if (name === 'radiator_temp_91') return 'AC2 Transformer Temperature';
+		}
 		// Base label from i18n with graceful fallback
 		const base = this._t(`config.${name}`, this._prettyLabel(name));
 

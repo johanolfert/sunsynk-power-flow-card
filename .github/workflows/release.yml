@@ -6,9 +6,16 @@ on:
       - main
   workflow_dispatch:
 
+permissions:
+  contents: write
+
+concurrency:
+  group: card-release
+  cancel-in-progress: false
+
 jobs:
   release:
-    name: Create release
+    name: Build and publish release
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -20,55 +27,33 @@ jobs:
         with:
           node-version: '24'
 
-      - name: Get latest tag or fail
-        id: get-latest-tag
+      - name: Check version tag
+        id: version
+        shell: bash
         run: |
-          latest_tag=$(git for-each-ref --sort=version:refname --format '%(refname)' refs/tags/ | grep -v 'latest' | tail -1 | sed 's/^refs\/tags\///; s/^v//')
-          if [ -z "$latest_tag" ]; then
-            echo "No tags found for the commit."
-            exit 1
-          fi
-          echo "tag=$latest_tag" >> $GITHUB_OUTPUT
-
-      - name: Get current version
-        id: get-version
-        run: echo "version=$(node -pe "require('./package.json').version")" >> $GITHUB_ENV
-
-      - name: Check if version is higher
-        id: check-version
-        run: |
-          is_higher=$(node -e "const parse = version => version.split('.').map(Number); const compare = (a, b) => { const [aMajor, aMinor, aPatch] = parse(a); const [bMajor, bMinor, bPatch] = parse(b); return aMajor !== bMajor ? aMajor - bMajor : aMinor !== bMinor ? aMinor - bMinor : aPatch - bPatch; }; process.stdout.write(String(compare('${{ env.version }}', '${{ steps.get-latest-tag.outputs.tag }}') > 0));")
-          if [ "$is_higher" != "true" ]; then
-            echo "is_higher_version=false" >> $GITHUB_ENV
-            echo "The version is not higher than the latest release"
-            exit 1
+          version=$(node -p "require('./package.json').version")
+          echo "tag=v$version" >> "$GITHUB_OUTPUT"
+          if git show-ref --verify --quiet "refs/tags/v$version"; then
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "publish=true" >> "$GITHUB_OUTPUT"
           fi
 
-          echo "is_higher_version=true" >> $GITHUB_ENV
-
-      - name: Remove package-lock.json to prevent conflicts
-        if: env.is_higher_version == 'true'
-        run: |
-          if [ -f package-lock.json ]; then
-            rm package-lock.json
-          fi
-
-      - name: Build project
-        if: env.is_higher_version == 'true'
+      - name: Build card
+        if: steps.version.outputs.publish == 'true'
         run: |
           npm install --legacy-peer-deps
           npm run build
+          node --check dist/sunsynk-power-flow-card.js
 
-      - name: 🛎️ Create release
-        if: env.is_higher_version == 'true'
-        uses: softprops/action-gh-release@v3
-        with:
-          files: dist/sunsynk-power-flow-card.js
-          tag_name: v${{ env.version }}
-          name: v${{ env.version }}
-          token: ${{ secrets.GITHUB_TOKEN }}
-          generate_release_notes: true
-
-      - name: 🏷️ Update latest tag
-        if: env.is_higher_version == 'true'
-        uses: EndBug/latest-tag@latest
+      - name: Publish HACS release asset
+        if: steps.version.outputs.publish == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ steps.version.outputs.tag }}
+          RELEASE_COMMIT: ${{ github.sha }}
+        run: |
+          gh release create "$RELEASE_TAG" dist/sunsynk-power-flow-card.js \
+            --target "$RELEASE_COMMIT" \
+            --title "$RELEASE_TAG" \
+            --notes "OutBack configuration page: rename DC Transformer Temperature to AC1 Transformer Temperature and Radiator Temperature to AC2 Transformer Temperature. Other inverter brands retain their existing configuration labels."
