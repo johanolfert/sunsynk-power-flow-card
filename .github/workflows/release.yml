@@ -56,4 +56,4 @@ jobs:
           gh release create "$RELEASE_TAG" dist/sunsynk-power-flow-card.js \
             --target "$RELEASE_COMMIT" \
             --title "$RELEASE_TAG" \
-            --notes "OutBack configuration page: rename DC Transformer Temperature to AC1 Transformer Temperature and Radiator Temperature to AC2 Transformer Temperature. Other inverter brands retain their existing configuration labels."
+            --generate-notes

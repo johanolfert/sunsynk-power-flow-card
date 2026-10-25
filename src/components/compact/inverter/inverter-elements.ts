@@ -6,6 +6,7 @@ import { Utils } from '../../../helpers/utils';
 import {
 	AutarkyType,
 	DataDto,
+	InverterModel,
 	sunsynkPowerFlowCardConfig,
 } from '../../../types';
 import { icons } from '../../../helpers/icons';
@@ -395,7 +396,7 @@ export const renderInverterElements = (
 				),
 				'st3 left-align',
 				inverterColour,
-				`DC: ${Utils.formatNumberLocale(data.stateDCTransformerTemp.toNum(1), 1)}°`,
+				`${config.inverter.model === InverterModel.Outback ? 'AC' : 'DC'}: ${Utils.formatNumberLocale(data.stateDCTransformerTemp.toNum(1), 1)}°`,
 				(e) => Utils.handlePopup(e, config.entities.dc_transformer_temp_90),
 				false,
 			)}
