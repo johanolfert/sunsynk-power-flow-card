@@ -85,7 +85,7 @@ export class SunSynkCardEditor
 	private static readonly HELP_TEXT: Record<string, string> = {
 		large_font: 'Use a larger font for card entities.',
 		wide: 'Use a wide layout for the card.',
-		additional_loads: 'Number of additional loads to configure (0–6).',
+		additional_loads: 'Number of additional loads to configure (0-6).',
 		colour: 'Primary colour for this element.',
 		efficiency:
 			'Show the effeciency of the mppts strings based on their max power.',
@@ -114,7 +114,7 @@ export class SunSynkCardEditor
 		modern: 'Change inverter icon.',
 		invert_grid:
 			'Enable if your sensor provides a negative number for grid import and positive number for grid export.',
-		aux_loads: 'Number of auxiliary loads to configure (0–2).',
+		aux_loads: 'Number of auxiliary loads to configure (0-2).',
 		show_nonessential: 'Show non-essential loads.',
 		show_aux:
 			'Show the Aux subsection (separate auxiliary load configuration).',
@@ -215,7 +215,7 @@ export class SunSynkCardEditor
 
 		// Pattern-based helper hints for dynamic load/aux subfields
 		if (SunSynkCardEditor.PATTERN_LOAD_NAME.test(name))
-			return 'Label for additional load.';
+			return 'Additional load label (can be set via sensor).';
 		if (SunSynkCardEditor.PATTERN_LOAD_ICON.test(name))
 			return 'Additional load icon (Can be set via template sensor).';
 		if (SunSynkCardEditor.PATTERN_LOAD_SWITCH.test(name))
@@ -558,12 +558,14 @@ export class SunSynkCardEditor
 			);
 		}
 
+		const sanitizedConfig = this._sanitizedConfig();
+
 		return html`
 			<ha-form
 				.hass=${this.hass}
-				.data=${this._sanitizedConfig()}
-				.computeLabel=${this._computeLabelCallback.bind(this)}
-				.computeHelper=${this._computeHelperCallback.bind(this)}
+				.data=${sanitizedConfig}
+				.computeLabel=${this._computeLabelCallback}
+				.computeHelper=${this._computeHelperCallback}
 				.schema=${[
 					{
 						type: 'expandable',
@@ -704,6 +706,7 @@ export class SunSynkCardEditor
 												{
 													name: 'solar',
 													type: 'grid',
+													column_min_width: '100%',
 													schema: [
 														{ name: 'max_power', selector: { entity: {} } },
 														{ name: 'pv1_max_power', selector: { entity: {} } },
@@ -823,6 +826,7 @@ export class SunSynkCardEditor
 														{
 															name: 'battery',
 															type: 'grid',
+															column_min_width: '100%',
 															schema: [
 																{ name: 'energy', selector: { entity: {} } },
 																{
@@ -942,6 +946,7 @@ export class SunSynkCardEditor
 																	{
 																		name: 'battery2',
 																		type: 'grid',
+																		column_min_width: '100%',
 																		schema: [
 																			{
 																				name: 'energy',
@@ -1143,18 +1148,43 @@ export class SunSynkCardEditor
 									{
 										name: 'load',
 										type: 'grid',
+										column_min_width: '100%',
 										schema: [
 											...((this._config.load?.additional_loads ?? 0) >= 1
-												? [{ name: 'load1_icon', selector: { entity: {} } }]
+												? [
+														{ name: 'load1_name', selector: { entity: {} } },
+														{ name: 'load1_icon', selector: { entity: {} } },
+													]
 												: []),
 											...((this._config.load?.additional_loads ?? 0) >= 2
-												? [{ name: 'load2_icon', selector: { entity: {} } }]
+												? [
+														{ name: 'load2_name', selector: { entity: {} } },
+														{ name: 'load2_icon', selector: { entity: {} } },
+													]
 												: []),
 											...((this._config.load?.additional_loads ?? 0) >= 3
-												? [{ name: 'load3_icon', selector: { entity: {} } }]
+												? [
+														{ name: 'load3_name', selector: { entity: {} } },
+														{ name: 'load3_icon', selector: { entity: {} } },
+													]
 												: []),
 											...((this._config.load?.additional_loads ?? 0) >= 4
-												? [{ name: 'load4_icon', selector: { entity: {} } }]
+												? [
+														{ name: 'load4_name', selector: { entity: {} } },
+														{ name: 'load4_icon', selector: { entity: {} } },
+													]
+												: []),
+											...((this._config.load?.additional_loads ?? 0) >= 5
+												? [
+														{ name: 'load5_name', selector: { entity: {} } },
+														{ name: 'load5_icon', selector: { entity: {} } },
+													]
+												: []),
+											...((this._config.load?.additional_loads ?? 0) >= 6
+												? [
+														{ name: 'load6_name', selector: { entity: {} } },
+														{ name: 'load6_icon', selector: { entity: {} } },
+													]
 												: []),
 											...((this._config.load?.aux_loads ?? 0) >= 1
 												? [{ name: 'aux_load1_icon', selector: { entity: {} } }]
@@ -1237,6 +1267,7 @@ export class SunSynkCardEditor
 												{
 													name: 'grid',
 													type: 'grid',
+													column_min_width: '100%',
 													schema: [
 														{ name: 'load1_icon', selector: { entity: {} } },
 														{ name: 'load2_icon', selector: { entity: {} } },
@@ -1918,7 +1949,7 @@ export class SunSynkCardEditor
 						],
 					},
 				]}
-				@value-changed=${this._valueChanged.bind(this)}
+				@value-changed=${this._valueChanged}
 			></ha-form>
 		`;
 	}
@@ -1931,6 +1962,7 @@ export class SunSynkCardEditor
 		// Clear cache when config changes
 		this._cachedSanitizedConfig = undefined;
 		this._lastCachedVersion = -1;
+		this.requestUpdate();
 		fireEvent(this, 'config-changed', { config });
 	}
 
@@ -1976,7 +2008,7 @@ export class SunSynkCardEditor
 				const max = cfg.max_line_width as number | undefined;
 				const min = cfg.min_line_width as number | undefined;
 				if (typeof max === 'number' && typeof min === 'number') {
-					return `${base} (min ${min} – max ${max})`;
+					return `${base} (min ${min} - max ${max})`;
 				}
 				return `${base} (${this._t('config.inline.enabled', 'enabled')})`;
 			}
@@ -1998,7 +2030,7 @@ export class SunSynkCardEditor
 		return this._t(`config.cat_title.${opt}`, opt);
 	}
 
-	private _valueChanged(ev: CustomEvent): void {
+	private _valueChanged = (ev: CustomEvent): void => {
 		// ha-form returns color_rgb as arrays or {r,g,b}; ensure all '*_colour' values become hex strings before emitting
 		const v = ev.detail.value as Record<string, unknown>;
 		// IMPORTANT: do NOT mutate v (the form's live value). Clone before normalization to avoid breaking the picker UI.
@@ -2034,5 +2066,5 @@ export class SunSynkCardEditor
 		}
 		// Update local config and emit cloned hex-normalized config; this keeps the form's RGB value intact
 		this._emitConfig(out as unknown as sunsynkPowerFlowCardConfig);
-	}
+	};
 }
