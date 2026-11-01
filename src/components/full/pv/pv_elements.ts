@@ -2,7 +2,11 @@
 import { html, svg } from 'lit';
 import { localize } from '../../../localize/localize';
 import { Utils } from '../../../helpers/utils';
-import { DataDto, InverterModel, sunsynkPowerFlowCardConfig } from '../../../types';
+import {
+	DataDto,
+	InverterModel,
+	sunsynkPowerFlowCardConfig,
+} from '../../../types';
 import {
 	UnitOfElectricalCurrent,
 	UnitOfElectricPotential,
@@ -32,21 +36,22 @@ export const renderSolarElements = (
 		config.solar;
 
 	// Full style: give the two OutBack controllers room for full-size names.
-	const widerPV = mppts === 2 && config.inverter.model === InverterModel.Outback;
+	const widerPV =
+		mppts === 2 && config.inverter.model === InverterModel.Outback;
 	const pvWidth = widerPV ? 100 : 70;
 	return html`
 		<!-- Solar Elements -->
 		<svg
 			id="Solar"
-			style="overflow: visible; display: ${!config.show_solar
-				? 'none'
-				: 'inline'};"
+			style="overflow: visible; display: ${
+				!config.show_solar ? 'none' : 'inline'
+			};"
 			x="3%"
 			y="2.5%"
 		>
-			${renderPV('pvtotal', '51', '162', data, config)}
+			${renderPV('pvtotal', widerPV ? '66' : '51', '162', data, config)}
 			${renderPV('pv1', widerPV ? '-14' : '0', '40', data, config, pvWidth)}
-			${renderPV('pv2', '101', '40', data, config, pvWidth)}
+			${renderPV('pv2', widerPV ? '116' : '101', '40', data, config, pvWidth)}
 			${renderPV('pv3', '0', '100', data, config)}
 			${renderPV('pv4', '101', '100', data, config)}
 			${renderText(
@@ -73,7 +78,7 @@ export const renderSolarElements = (
 			)}
 			${renderText(
 				'pv2_name',
-				widerPV ? 101 : 99,
+				widerPV ? 116 : 99,
 				78.5,
 				mppts === 1,
 				'st3 st8 left-align',
@@ -85,7 +90,7 @@ export const renderSolarElements = (
 			)}
 			${renderText(
 				'pv2_efficiency',
-				widerPV ? 101 : 99,
+				widerPV ? 116 : 99,
 				90,
 				mppts === 1 || [0, 1].includes(efficiency),
 				[2, 3].includes(efficiency) ? 'st3 st8 left-align' : 'st12',
@@ -135,7 +140,7 @@ export const renderSolarElements = (
 			)}
 			${renderText(
 				'total_pv_efficiency',
-				51,
+				widerPV ? 66 : 51,
 				202,
 				[0, 1].includes(efficiency) || mppts === 1,
 				[2, 3].includes(efficiency) ? 'st3 st8 left-align' : 'st12',
@@ -180,7 +185,7 @@ export const renderSolarElements = (
 						? 'M 86 175 M 278 250 L 96 250 Q 86 250 86 240 L 86 56 H 70'
 						: 'M 86 175 M 155 250 L 96 250 Q 86 250 86 240 L 86 56 H 70'
 					: widerPV
-						? 'M 86 162 V 132 Q 86 126 93.5 126 V 56 H 86'
+						? 'M 101 162 V 56 H 86'
 						: 'M 86 162 L 86 56 Q 86 56 86 56 L 70 56',
 				solarColour,
 				data.pv1LineWidth,
@@ -194,7 +199,7 @@ export const renderSolarElements = (
 			${renderPVFlow(
 				'pv2',
 				widerPV
-					? 'M 86 162 V 132 Q 86 126 93.5 126 V 56 H 101'
+					? 'M 101 162 V 56 H 116'
 					: 'M 86 162 L 86 56 Q 86 56 86 56 L 101 56',
 				solarColour,
 				data.pv2LineWidth,
@@ -231,9 +236,13 @@ export const renderSolarElements = (
 			)}
 			${renderPVFlow(
 				'solar',
-				config.wide
-					? 'M 278 250 L 96 250 Q 86 250 86 240 L 86 192'
-					: 'M 155 250 L 96 250 Q 86 250 86 240 L 86 192',
+				widerPV
+					? config.wide
+						? 'M 278 250 H 111 Q 101 250 101 240 V 192'
+						: 'M 155 250 H 111 Q 101 250 101 240 V 192'
+					: config.wide
+						? 'M 278 250 L 96 250 Q 86 250 86 240 L 86 192'
+						: 'M 155 250 L 96 250 Q 86 250 86 240 L 86 192',
 				solarColour,
 				data.solarLineWidth,
 				totalPV,
@@ -243,8 +252,9 @@ export const renderSolarElements = (
 				mppts === 1 ? 'st12' : '',
 				'1;0',
 			)}
-			${config.solar?.navigate
-				? svg`
+			${
+				config.solar?.navigate
+					? svg`
                     <a href="#" @click=${(e) => Utils.handleNavigation(e, config.solar.navigate)}>
                         <svg xmlns="http://www.w3.org/2000/svg" id="sun" x="0" y="-0.5" width="40" height="40"
                             viewBox="0 0 24 24">
@@ -252,12 +262,13 @@ export const renderSolarElements = (
                                 d="${icons.sun}"/>
                         </svg>
                     </a>`
-				: svg`
+					: svg`
                     <svg xmlns="http://www.w3.org/2000/svg" id="sun" x="0" y="-0.5" width="40" height="40"
                         viewBox="0 0 24 24">
                         <path fill="${solarColour}"
                             d="${icons.sun}"/>
-                    </svg>`}
+                    </svg>`
+			}
 			<a
 				href="#"
 				@click=${(e) => Utils.handlePopup(e, config.entities.solar_sell_247)}
@@ -265,20 +276,22 @@ export const renderSolarElements = (
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
 					id="solar_sell_on"
-					x="96"
+					x="${widerPV ? 111 : 96}"
 					y="197"
 					width="18"
 					height="18"
 					viewBox="0 0 30 30"
 				>
 					<path
-						display="${!config.entities.solar_sell_247 ||
-						config.entities.solar_sell_247 === 'none' ||
-						data.stateSolarSell.state === 'off' ||
-						data.stateSolarSell.state === '0' ||
-						!['1', 'on'].includes(data.stateSolarSell.state)
-							? 'none'
-							: ''}"
+						display="${
+							!config.entities.solar_sell_247 ||
+							config.entities.solar_sell_247 === 'none' ||
+							data.stateSolarSell.state === 'off' ||
+							data.stateSolarSell.state === '0' ||
+							!['1', 'on'].includes(data.stateSolarSell.state)
+								? 'none'
+								: ''
+						}"
 						fill="${solarColour}"
 						d="${icons.solarSellOn}"
 					/>
@@ -286,20 +299,22 @@ export const renderSolarElements = (
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
 					id="solar_sell_off"
-					x="96"
+					x="${widerPV ? 111 : 96}"
 					y="197"
 					width="18"
 					height="18"
 					viewBox="0 0 30 30"
 				>
 					<path
-						display="${!config.entities.solar_sell_247 ||
-						config.entities.solar_sell_247 === 'none' ||
-						data.stateSolarSell.state === 'on' ||
-						data.stateSolarSell.state === '1' ||
-						!['0', 'off'].includes(data.stateSolarSell.state)
-							? 'none'
-							: ''}"
+						display="${
+							!config.entities.solar_sell_247 ||
+							config.entities.solar_sell_247 === 'none' ||
+							data.stateSolarSell.state === 'on' ||
+							data.stateSolarSell.state === '1' ||
+							!['0', 'off'].includes(data.stateSolarSell.state)
+								? 'none'
+								: ''
+						}"
 						fill="${solarColour}"
 						d="${icons.solarSellOff}"
 					/>
@@ -335,11 +350,12 @@ export const renderSolarElements = (
 				`${data.stateDayPVEnergy.toPowerString(true, data.decimalPlacesEnergy)} / ${data.totalSolarGeneration}`,
 				(e) => Utils.handlePopup(e, config.entities.day_pv_energy_108),
 			)}
-			${config.entities?.pv_total
-				? svg`
+			${
+				config.entities?.pv_total
+					? svg`
                     ${createTextWithPopup(
 											'pvtotal_power',
-											87,
+											widerPV ? 102 : 87,
 											178,
 											mppts === 1 || !data.statePVTotal.isValid(),
 											`${largeFont !== true ? 'st14' : 'st4'} st8`,
@@ -352,10 +368,10 @@ export const renderSolarElements = (
 											(e) => Utils.handlePopup(e, config.entities.pv_total),
 											true,
 										)}`
-				: svg`
+					: svg`
                     ${renderText(
 											'pvtotal_power',
-											87,
+											widerPV ? 102 : 87,
 											178,
 											mppts === 1 || !data.statePVTotal.isValid(),
 											`${largeFont !== true ? 'st14' : 'st4'} st8`,
@@ -366,7 +382,8 @@ export const renderSolarElements = (
 													: `${Utils.convertValue(totalPV, decimalPlaces) || 0}`
 												: `${Utils.toNum(totalPV || 0, 0)} ${UnitOfPower.WATT}`,
 											true,
-										)}`}
+										)}`
+			}
 			${createTextWithPopup(
 				'pv1_power_186',
 				36.5,
@@ -382,7 +399,7 @@ export const renderSolarElements = (
 			)}
 			${createTextWithPopup(
 				'pv2_power_187',
-				widerPV ? 151 : 137,
+				widerPV ? 166 : 137,
 				56.5,
 				mppts === 1 || !data.statePV2Power.isValid(),
 				`${largeFont !== true ? 'st14' : 'st4'} st8`,
@@ -453,7 +470,7 @@ export const renderSolarElements = (
 			)}
 			${createTextWithPopup(
 				'pv2_voltage',
-				widerPV ? 166 : 142,
+				widerPV ? 181 : 142,
 				78.5,
 				!config.entities.pv2_voltage_111 ||
 					config.entities.pv2_voltage_111 === 'none' ||
@@ -470,7 +487,7 @@ export const renderSolarElements = (
 			)}
 			${createTextWithPopup(
 				'pv2_current',
-				widerPV ? 166 : 142,
+				widerPV ? 181 : 142,
 				90,
 				!config.entities.pv2_current_112 ||
 					config.entities.pv2_current_112 === 'none' ||
@@ -560,7 +577,7 @@ export const renderSolarElements = (
 				!data.stateEnvironmentTemp.isValid(),
 				config.entities?.environment_temp ? 'st3 left-align' : 'st12',
 				solarColour,
-				`${data.stateEnvironmentTemp.toNum(1)}°`,
+				`${data.stateEnvironmentTemp.toNum(1)}�`,
 				(e) => Utils.handlePopup(e, config.entities.environment_temp),
 				true,
 			)}
