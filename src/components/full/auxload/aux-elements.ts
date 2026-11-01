@@ -1,3 +1,4 @@
+import { hasLimitedPVNames } from '../../../helpers/pv-name';
 // aux-elements.ts
 import { svg, html } from 'lit';
 import { guard } from 'lit/directives/guard.js';
@@ -166,7 +167,9 @@ export const renderAuxLoadElements = (
 					'aux-line2',
 					config.wide
 						? 'M 108 162 L 108 57 Q 108 47 118 47 L 237 47'
-						: 'M 180 162 L 180 57 Q 180 47 190 47 L 237 47',
+						: hasLimitedPVNames(config) && config.show_solar
+							? 'M 180 162 V 110 Q 180 100 190 100 H 216 Q 226 100 226 90 V 57 Q 226 47 236 47 H 237'
+							: 'M 180 162 L 180 57 Q 180 47 190 47 L 237 47',
 					showAux,
 					auxDynamicColour,
 					data.auxLineWidth,
@@ -233,21 +236,23 @@ export const renderAuxLoadElements = (
 					<g
 						transform="translate(0.000000,91.000000) scale(0.100000,-0.100000)"
 						class="${data.auxType === 'inverter' ? '' : 'st12'}"
-						display="${!showAux || [1, 2].includes(additionalAuxLoad)
-							? 'none'
-							: ''}"
-						fill="${auxStatus === 'on' || auxStatus === '1'
-							? `${auxDynamicColour}`
-							: `${data.auxOffColour}`}"
+						display="${
+							!showAux || [1, 2].includes(additionalAuxLoad) ? 'none' : ''
+						}"
+						fill="${
+							auxStatus === 'on' || auxStatus === '1'
+								? `${auxDynamicColour}`
+								: `${data.auxOffColour}`
+						}"
 						stroke="none"
 					>
 						<path d="${icons.inverter}" />
 					</g>
 				</svg>
 				<g
-					display="${!showAux || [1, 2].includes(additionalAuxLoad)
-						? 'none'
-						: ''}"
+					display="${
+						!showAux || [1, 2].includes(additionalAuxLoad) ? 'none' : ''
+					}"
 				>
 					${renderIcon(
 						undefined,
@@ -272,9 +277,9 @@ export const renderAuxLoadElements = (
 				)}
 			</g>
 			<g
-				display="${!showAux || [0, 1].includes(additionalAuxLoad)
-					? 'none'
-					: ''}"
+				display="${
+					!showAux || [0, 1].includes(additionalAuxLoad) ? 'none' : ''
+				}"
 			>
 				${renderIcon(
 					undefined,
@@ -299,8 +304,9 @@ export const renderAuxLoadElements = (
 				(e) => Utils.handlePopup(e, config.entities.day_aux_energy),
 				true,
 			)}
-			${config.entities?.aux_power_166
-				? svg`
+			${
+				config.entities?.aux_power_166
+					? svg`
                     ${createTextWithPopup(
 											'aux_power_166',
 											270,
@@ -327,7 +333,7 @@ export const renderAuxLoadElements = (
 												Utils.handlePopup(e, config.entities.aux_power_166),
 											true,
 										)}`
-				: svg`
+					: svg`
                     ${renderText(
 											'aux_power_166',
 											270,
@@ -351,7 +357,8 @@ export const renderAuxLoadElements = (
 															: auxPower || 0
 													} ${UnitOfPower.WATT}`,
 											true,
-										)}`}
+										)}`
+			}
 			${createTextWithPopup(
 				'aux_load1_value',
 				411,
