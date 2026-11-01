@@ -17,6 +17,7 @@ import { capitalize } from 'lodash';
 import defaults from './defaults';
 import { EDITOR_NAME, SensorDeviceClass } from './const';
 import { LovelaceConfig } from 'custom-card-helpers/src/types';
+import { hasLimitedPVNames, limitPVName, PV_NAME_MAX_LENGTH } from './helpers/pv-name';
 
 @customElement(EDITOR_NAME)
 export class SunSynkCardEditor
@@ -212,6 +213,10 @@ export class SunSynkCardEditor
 			// fall through to defaults below when localization lookup fails
 		}
 		*/
+
+		if (hasLimitedPVNames(this._config) && ['pv1_name', 'pv2_name'].includes(name)) {
+			return `PV name: maximum ${PV_NAME_MAX_LENGTH} characters (including spaces).`;
+		}
 
 		// Pattern-based helper hints for dynamic load/aux subfields
 		if (SunSynkCardEditor.PATTERN_LOAD_NAME.test(name))
@@ -2036,6 +2041,14 @@ export class SunSynkCardEditor
 		// IMPORTANT: do NOT mutate v (the form's live value). Clone before normalization to avoid breaking the picker UI.
 		const out = JSON.parse(JSON.stringify(v)) as Record<string, unknown>;
 		this._normalizeColorsInObject(out);
+
+		const editedConfig = out as unknown as sunsynkPowerFlowCardConfig;
+		if (hasLimitedPVNames(editedConfig)) {
+			for (const key of ['pv1_name', 'pv2_name'] as const) {
+				const name = editedConfig.solar[key];
+				if (typeof name === 'string') editedConfig.solar[key] = limitPVName(name);
+			}
+		}
 
 		// Normalize dynamic line width values if present
 		if (out && typeof out === 'object' && out.dynamic_line_width) {

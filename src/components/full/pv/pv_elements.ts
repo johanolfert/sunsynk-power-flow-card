@@ -9,6 +9,7 @@ import {
 	UnitOfPower,
 } from '../../../const';
 import { icons } from '../../../helpers/icons';
+import { limitPVName } from '../../../helpers/pv-name';
 import { renderPV } from '../../shared/pv/render-pv';
 import { renderPVFlow } from '../../shared/pv/render-pv-flow';
 import { createTextWithPopup, renderText } from '../../../helpers/text-utils';
@@ -55,7 +56,9 @@ export const renderSolarElements = (
 				!config.show_solar,
 				'st3 st8 left-align',
 				solarColour,
-				config.solar.pv1_name || localize('common.pv1_name'),
+				widerPV
+					? limitPVName(config.solar.pv1_name || localize('common.pv1_name'))
+					: config.solar.pv1_name || localize('common.pv1_name'),
 				true,
 			)}
 			${renderText(
@@ -75,7 +78,9 @@ export const renderSolarElements = (
 				mppts === 1,
 				'st3 st8 left-align',
 				solarColour,
-				config.solar.pv2_name || localize('common.pv2_name'),
+				widerPV
+					? limitPVName(config.solar.pv2_name || localize('common.pv2_name'))
+					: config.solar.pv2_name || localize('common.pv2_name'),
 				true,
 			)}
 			${renderText(

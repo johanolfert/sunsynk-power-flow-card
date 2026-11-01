@@ -1,0 +1,49 @@
+name: Refresh beta2 release
+
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/refresh-beta2.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: card-release
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Verify beta2 and build
+        run: |
+          test "$(node -p "require('./package.json').version")" = "7.5.8-beta2"
+          npm install --legacy-peer-deps
+          npm run build
+          node --check dist/sunsynk-power-flow-card.js
+      - name: Refresh beta2 tag and download
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          EXPECTED_TAG_SHA: 4b9a2ca10788ae440311f7a438bd81c2b74325a3
+        shell: bash
+        run: |
+          tag=v7.5.8-beta2
+          current=$(git rev-parse "refs/tags/$tag")
+          if [ "$current" != "$GITHUB_SHA" ]; then
+            test "$current" = "$EXPECTED_TAG_SHA"
+            git push --force-with-lease="refs/tags/$tag:$EXPECTED_TAG_SHA" origin "HEAD:refs/tags/$tag"
+          fi
+          gh release upload "$tag" dist/sunsynk-power-flow-card.js --clobber
+          gh release view "$tag" --json body --jq .body > release-notes.md
+          if ! grep -q '12-character' release-notes.md; then
+            printf '\n\n### PV name input limit\n- Full-mode OutBack setups with two MPPTs now limit PV1 and PV2 names to 12 characters, including spaces. Compact and Lite retain their existing behavior.\n- If beta2 is already installed, redownload it in HACS and refresh the browser.\n' >> release-notes.md
+          fi
+          gh release edit "$tag" --notes-file release-notes.md
