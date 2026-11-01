@@ -7,6 +7,7 @@ export function renderPV(
 	y: string,
 	data: DataDto,
 	config: sunsynkPowerFlowCardConfig,
+	width = 70,
 ) {
 	// Only vary gradient id when efficiency > 0 and gradient is used.
 	// When efficiency is 0, we render a stable grey stroke without a gradient to avoid paint churn.
@@ -68,9 +69,9 @@ export function renderPV(
 			id="${id}"
 			x="${x}"
 			y="${y}"
-			width="70"
+			width="${width}"
 			height="30"
-			viewBox="0 0 70 30"
+			viewBox="0 0 ${width} 30"
 			overflow="visible"
 		>
 			${
@@ -94,7 +95,7 @@ export function renderPV(
 			}
 			<rect
 				id="${id}"
-				width="70"
+				width="${width}"
 				height="30"
 				rx="4.5"
 				ry="4.5"

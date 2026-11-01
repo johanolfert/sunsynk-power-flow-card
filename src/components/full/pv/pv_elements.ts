@@ -2,7 +2,7 @@
 import { html, svg } from 'lit';
 import { localize } from '../../../localize/localize';
 import { Utils } from '../../../helpers/utils';
-import { DataDto, sunsynkPowerFlowCardConfig } from '../../../types';
+import { DataDto, InverterModel, sunsynkPowerFlowCardConfig } from '../../../types';
 import {
 	UnitOfElectricalCurrent,
 	UnitOfElectricPotential,
@@ -30,6 +30,9 @@ export const renderSolarElements = (
 	const { auto_scale, efficiency, mppts, display_mode, invert_flow } =
 		config.solar;
 
+	// Full style: give the two OutBack controllers room for full-size names.
+	const widerPV = mppts === 2 && config.inverter.model === InverterModel.Outback;
+	const pvWidth = widerPV ? 100 : 70;
 	return html`
 		<!-- Solar Elements -->
 		<svg
@@ -41,13 +44,13 @@ export const renderSolarElements = (
 			y="2.5%"
 		>
 			${renderPV('pvtotal', '51', '162', data, config)}
-			${renderPV('pv1', '0', '40', data, config)}
-			${renderPV('pv2', '101', '40', data, config)}
+			${renderPV('pv1', widerPV ? '-14' : '0', '40', data, config, pvWidth)}
+			${renderPV('pv2', '101', '40', data, config, pvWidth)}
 			${renderPV('pv3', '0', '100', data, config)}
 			${renderPV('pv4', '101', '100', data, config)}
 			${renderText(
 				'pv1_name',
-				0,
+				widerPV ? -14 : 0,
 				78.5,
 				!config.show_solar,
 				'st3 st8 left-align',
@@ -57,7 +60,7 @@ export const renderSolarElements = (
 			)}
 			${renderText(
 				'pv1_efficiency',
-				0,
+				widerPV ? -14 : 0,
 				90,
 				[0, 1].includes(efficiency),
 				[2, 3].includes(efficiency) ? 'st3 st8 left-align' : 'st12',
@@ -67,7 +70,7 @@ export const renderSolarElements = (
 			)}
 			${renderText(
 				'pv2_name',
-				99,
+				widerPV ? 101 : 99,
 				78.5,
 				mppts === 1,
 				'st3 st8 left-align',
@@ -77,7 +80,7 @@ export const renderSolarElements = (
 			)}
 			${renderText(
 				'pv2_efficiency',
-				99,
+				widerPV ? 101 : 99,
 				90,
 				mppts === 1 || [0, 1].includes(efficiency),
 				[2, 3].includes(efficiency) ? 'st3 st8 left-align' : 'st12',
@@ -171,7 +174,9 @@ export const renderSolarElements = (
 					? config.wide
 						? 'M 86 175 M 278 250 L 96 250 Q 86 250 86 240 L 86 56 H 70'
 						: 'M 86 175 M 155 250 L 96 250 Q 86 250 86 240 L 86 56 H 70'
-					: 'M 86 162 L 86 56 Q 86 56 86 56 L 70 56',
+					: widerPV
+						? 'M 86 162 V 132 Q 86 126 93.5 126 V 56 H 86'
+						: 'M 86 162 L 86 56 Q 86 56 86 56 L 70 56',
 				solarColour,
 				data.pv1LineWidth,
 				data.pv1PowerWatts,
@@ -183,7 +188,9 @@ export const renderSolarElements = (
 			)}
 			${renderPVFlow(
 				'pv2',
-				'M 86 162 L 86 56 Q 86 56 86 56 L 101 56',
+				widerPV
+					? 'M 86 162 V 132 Q 86 126 93.5 126 V 56 H 101'
+					: 'M 86 162 L 86 56 Q 86 56 86 56 L 101 56',
 				solarColour,
 				data.pv2LineWidth,
 				data.pv2PowerWatts,
@@ -370,7 +377,7 @@ export const renderSolarElements = (
 			)}
 			${createTextWithPopup(
 				'pv2_power_187',
-				137,
+				widerPV ? 151 : 137,
 				56.5,
 				mppts === 1 || !data.statePV2Power.isValid(),
 				`${largeFont !== true ? 'st14' : 'st4'} st8`,
@@ -409,7 +416,7 @@ export const renderSolarElements = (
 			)}
 			${createTextWithPopup(
 				'pv1_voltage',
-				41,
+				widerPV ? 51 : 41,
 				78.5,
 				!config.entities.pv1_voltage_109 ||
 					config.entities.pv1_voltage_109 === 'none' ||
@@ -425,7 +432,7 @@ export const renderSolarElements = (
 			)}
 			${createTextWithPopup(
 				'pv1_current',
-				41,
+				widerPV ? 51 : 41,
 				90,
 				!config.entities.pv1_current_110 ||
 					config.entities.pv1_current_110 === 'none' ||
@@ -441,7 +448,7 @@ export const renderSolarElements = (
 			)}
 			${createTextWithPopup(
 				'pv2_voltage',
-				142,
+				widerPV ? 166 : 142,
 				78.5,
 				!config.entities.pv2_voltage_111 ||
 					config.entities.pv2_voltage_111 === 'none' ||
@@ -458,7 +465,7 @@ export const renderSolarElements = (
 			)}
 			${createTextWithPopup(
 				'pv2_current',
-				142,
+				widerPV ? 166 : 142,
 				90,
 				!config.entities.pv2_current_112 ||
 					config.entities.pv2_current_112 === 'none' ||
