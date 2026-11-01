@@ -1,6 +1,15 @@
 import { CSSResultGroup, css, html } from 'lit';
 
 export const styles: CSSResultGroup = css`
+  /* Keep overflowed PV artwork inside the configuration preview only. */
+  :host-context(hui-dialog-edit-card) .preview-pv-margin {
+    box-sizing: border-box;
+    width: 100%;
+    padding-inline: 18px;
+  }
+  :host-context(hui-dialog-edit-card) .preview-pv-margin > svg {
+    max-width: 100%;
+  }
 	.container {
 		display: flex;
 		flex-direction: column;
@@ -180,3 +189,4 @@ export const getDynamicStyles = (data) => html`
 		}
 	</style>
 `;
+

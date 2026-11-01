@@ -1,7 +1,7 @@
 import { html } from 'lit';
 import { cache } from 'lit/directives/cache.js';
 import { keyed } from 'lit/directives/keyed.js';
-import { DataDto, sunsynkPowerFlowCardConfig } from '../types';
+import { DataDto, InverterModel, sunsynkPowerFlowCardConfig } from '../types';
 import { getDynamicStyles } from '../style';
 import { renderSolarElements } from '../components/full/pv/pv_elements';
 import { renderBatteryElements } from '../components/full/bat/bat-elements';
@@ -15,7 +15,8 @@ export const fullCard = (
 	inverterImg: string,
 	data: DataDto,
 ) => {
-	const titleKey = config.title
+	const spacedPV = config.inverter.model === InverterModel.Outback && config.solar.mppts >= 2 && config.solar.mppts <= 4;
+ const titleKey = config.title
 		? `${config.title}|${config.title_colour ?? ''}|${config.title_size ?? ''}`
 		: 'no-title';
 	const titleTemplate = config.title
@@ -34,11 +35,12 @@ export const fullCard = (
 	return html`
 		<ha-card>
 			${getDynamicStyles(data)}
-			<div class="container card">
+			<div class="container card ${spacedPV ? 'preview-pv-margin' : ''}">
 				${titleTemplate}
 				<svg
 					viewBox="${config.wide ? '0 0 720 405' : '0 0 483 405'}"
 					preserveAspectRatio="xMidYMid meet"
+                    overflow="visible"
 					height="${data.cardHeight}"
 					width="${data.cardWidth}"
 					xmlns="http://www.w3.org/2000/svg"
@@ -66,3 +68,6 @@ export const fullCard = (
 		</ha-card>
 	`;
 };
+
+
+
